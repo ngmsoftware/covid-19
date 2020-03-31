@@ -1,0 +1,56 @@
+clear();
+clc();
+ 
+
+MAX_ITER = 600;
+
+dt = 0.2;
+
+beta = 1/1.0;     % Infection rate (average time between contacts) : 1/day
+aplha = 1/5.8;    % protection rate : 1/day
+gamma = 1/2;      % average latent time (inverse of incubation time. infected but not infecting others) : 1/day
+delta = 1/9;      % average quarentine time (time until being imunized / quarentined after exposed. during this time, one can infect others. This is the dangerous time) : 1/day
+kappa = 1/1;      % cure rate : 1/day
+lambda = 1/10;    % mortality rate : 1/day
+N = 209.3e6;        % population : individuals
+N0 = 10;
+
+parameters = [beta, aplha, gamma, delta, lambda, kappa, N, N0];
+
+[S_, t_] = computeSerie(MAX_ITER, dt, beta, aplha, gamma, delta, kappa, lambda, N, N0);
+
+
+
+
+% [date, confirmed, deaths, recovered] = getData();
+% confirmed(confirmed==0) = [];
+% s = confirmed;
+
+s = S_(2,1:round(1/dt):end);
+
+
+
+lb = parameters*0.5;
+ub = parameters*1.5;
+
+options = optimoptions('ga');
+%% Modify options setting
+options = optimoptions(options,'MaxGenerations', 10000);
+options = optimoptions(options,'FunctionTolerance', 0.0);
+options = optimoptions(options,'ConstraintTolerance', 0.0);
+options = optimoptions(options,'Display', 'off');
+options = optimoptions(options,'PlotFcn', { @gaplotbestf });
+[x,fval,exitflag,output,population,score] = ...
+ga(@(x)modelError(x,s,[2]),8,[],[],[],[],lb,ub,[],[],options);
+
+p1 = [0.9945559941537      0.174174336241     0.5002912159905     0.1101365257012     0.1004816847566      1.089894340552      209135611.2072      10.49122221435];
+
+
+[S_, t_] = computeSerie(MAX_ITER, dt, p1(1), p1(2), p1(3), p1(4), p1(5), p1(6), p1(7), p1(8));
+
+sHat = S_(2,1:round(1/dt):end);
+
+
+plot(s);
+hold('on');
+plot(sHat);

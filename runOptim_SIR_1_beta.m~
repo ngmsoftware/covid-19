@@ -1,0 +1,90 @@
+clear();
+clc();
+ 
+
+MAX_ITER = 600;
+
+index = 3; % S_(index) will be the variable to match
+
+dt = 0.2;
+
+beta = 1/1.0;     % Infection rate (average time between contacts) : 1/day
+aplha = 1/5.8;    % protection rate : 1/day
+gamma = 1/2;      % average latent time (inverse of incubation time. infected but not infecting others) : 1/day
+delta = 1/9;      % average quarentine time (time until being imunized / quarentined after exposed. during this time, one can infect others. This is the dangerous time) : 1/day
+kappa = 1/1;      % cure rate : 1/day
+lambda = 1/10;    % mortality rate : 1/day
+N = 209.3e6;        % population : individuals
+N0 = 10;
+time1 = 1;
+beta2 = beta;
+
+
+parameters = [beta, aplha, gamma, delta, lambda, kappa, N, N0, time1, beta2];
+
+
+
+[date, confirmed, deaths, recovered] = getData();
+confirmed(confirmed==0) = [];
+s = confirmed;
+
+
+
+lb = parameters.*[0.1 0.1 0.1 0.1 0.1 0.1 0.99 0.1 1 1];
+ub = parameters.*[ 10  10  10  10  10  10 1.01  10 1 1];
+
+
+options = optimoptions('ga');
+%% Modify options setting
+options = optimoptions(options,'MaxGenerations', 10000);
+options = optimoptions(options,'PopulationSize', 2000);
+options = optimoptions(options,'FunctionTolerance', 0.0);
+options = optimoptions(options,'Display', 'off');
+options = optimoptions(options,'MaxStallGenerations', inf);
+options = optimoptions(options,'PlotFcn', { @gaplotbestf });
+[x,fval,exitflag,output,population,score] = ...
+ga(@(x)modelError(x,s,[index]),10,[],[],[],[],lb,ub,[],[],options);
+
+p1 = x.*[1 nan 1 nan nan nan 1 1 1 1];
+
+
+[S_, t_] = computeSerie(size(s,2)/dt, dt, p1(1), p1(2), p1(3), p1(4), p1(5), p1(6), p1(7), p1(8), p1(9), p1(10));
+t_ = t_(1:round(1/dt):end);
+
+sHat = S_(index,1:round(1/dt):end);
+
+
+figure();
+plot(t_,s);
+hold('on');
+plot(t_,sHat);
+line([p1(9)*max(t_) p1(9)*max(t_)],[0 max(s)])
+
+
+runPos = 0;
+
+if (runPos)
+
+
+    % post computed...
+
+    % with second beta
+    % SEIR
+    p1 = [1.46527125095     0.849004843349      3.80628609231      1.03174512384     0.714833851448      8.16034793527      95750840.7932      2.13202524811     0.831572144612       1.2246445639];
+    p1 = [0.7278590026224      1.505134529856      4.846353893138     0.3660180969045     0.3595258593255      9.523138579592      208041459.4586      4.903623761071     0.8744027285365     0.5164166737326];
+    %SIR
+    p1 = [5.923953171585     0.9293599337646    0.09596565464956     0.9261072603361     0.7997353081988       8.15202290296      210834437.3869      1.190672874451     0.7549039240632      2.601610557282];
+    p1 = [5.257336193205      1.251984365521      4.986265781251     0.8171980304602     0.9495750244906      8.336222450579      207212022.8378      1.799778992852     0.8245918767482      5.114639260278];
+    [S2_, t2_] = computeSerie(600, dt, p1(1), p1(2), p1(3), p1(4), p1(5), p1(6), p1(7), p1(8), p1(9)*max(t_)/(600*dt), p1(10));
+
+    % without second beta
+    % SEIR
+    p1 = [0.421384761434     0.5970223090676      2.293048775099    0.04114034146398     0.8074579737952      9.248464166074      207523138.5021      3.350823535353                   nan                   1];
+    %SIR
+    p1 = [2.084597565794      1.345231681034                 1.8    0.04421150864306     0.8506572987884      9.241453291421      207207676.1602         1.060546875                   nan                   1];
+    [S1_, t1_] = computeSerie(600, dt, p1(1), p1(2), p1(3), p1(4), p1(5), p1(6), p1(7), p1(8), p1(9)*max(t_)/(600*dt), p1(10));
+
+    plot(t1_, S1_(index,:), 'g','linewidth',2);
+    plot(t2_, S2_(index,:), 'k','linewidth',2);
+
+end
