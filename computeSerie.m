@@ -25,8 +25,8 @@ for i=1:MAX_ITER
     t = t+dt;
 
     if ~isnan(time1)
-        parameters(1) = (0.5+atan(i-MAX_ITER*time1)/pi)*(beta2-beta)+beta;
-        parameters(3) = (0.5+atan(i-MAX_ITER*time1)/pi)*(gamma2-gamma)+gamma;
+        parameters(1) = (0.5+atan((i-MAX_ITER*time1)*10)/pi)*(beta2-beta)+beta;
+        parameters(3) = (0.5+atan((i-MAX_ITER*time1)*10)/pi)*(gamma2-gamma)+gamma;
     end
     
     S_(:,i) = S;

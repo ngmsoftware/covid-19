@@ -21,8 +21,8 @@ index = 3; % S_(index) will be the variable to match
 
 dt = 0.2;
 
-beta = 1/1.0;     % Infection rate (average time between contacts) : 1/day
-gamma = 1/2;      % average latent time (inverse of incubation time. infected but not infecting others) : 1/day
+beta = 1.0;     % Infection rate (average time between contacts) : 1/day
+gamma = 1.0;      % average latent time (inverse of incubation time. infected but not infecting others) : 1/day
 N = population;        % population : individuals
 N0 = active(1);
 time1 = 1;
@@ -35,7 +35,7 @@ parameters = [beta, 0.0, gamma, 0.0, 0.0, 0.0, N, N0, time1, beta2 gamma2];
 
 % fitting the second beta
 lb = parameters.*[0.1 0 0.1 0 0 0 1 0.1 0.0 0.0 0.0];
-ub = parameters.*[ 10 0  10 0 0 0 1  10 1.0  10 10];
+ub = parameters.*[ 10 0  10 0 0 0 1  10 1.0  10, 10];
 
 
 

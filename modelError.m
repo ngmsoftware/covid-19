@@ -13,7 +13,7 @@ function err = modelError(parameters, S, idxS)
     N0 = parameters(8);
     time1 = parameters(9);
     beta2 = parameters(10);
-    gamma2 = parameters(10);
+    gamma2 = parameters(11);
     
     [S_, t_] = computeSerie(MAX_ITER, dt, beta, aplha, gamma, delta, kappa, lambda, N, N0, time1, beta2, gamma2);
     

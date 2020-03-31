@@ -1,7 +1,7 @@
 clear();
 clc();
  
-country = 'China';
+country = 'Brazil';
 
 a = jsondecode(urlread('https://restcountries.eu/rest/v2/'));
 idx = find(cellfun(@(x)(strcmp(x,country)), {a.name}));
