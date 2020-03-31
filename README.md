@@ -6,4 +6,4 @@ To run:
 or
 >> runOptim_SIR_2_beta
 
-you must have optimization toolbox
+you must have optimization and global optimization toolbox
