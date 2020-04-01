@@ -45,7 +45,7 @@ options = optimoptions(options,'PopulationSize', 2000);
 options = optimoptions(options,'FunctionTolerance', 0.0);
 options = optimoptions(options,'Display', 'off');
 options = optimoptions(options,'MaxStallGenerations', inf);
-options = optimoptions(options,'PlotFcn', { @gaplotbestf });
+options = optimoptions(options,'PlotFcn', { @gaplotbestf,  });
 [x,fval,exitflag,output,population,score] = ...
 ga(@(x)modelError(x,s,index),11,[],[],[],[],lb,ub,[],[],options);
 

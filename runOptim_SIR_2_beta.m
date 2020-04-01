@@ -1,7 +1,7 @@
 clear();
 clc();
 
-country = 'China';
+country = 'Brazil';
 
 a = jsondecode(urlread('https://restcountries.eu/rest/v2/'));
 idx = find(cellfun(@(x)(strcmp(x,country)), {a.name}));
@@ -44,24 +44,27 @@ options = optimoptions('ga');
 options = optimoptions(options,'MaxGenerations', 10000);
 options = optimoptions(options,'PopulationSize', 2000);
 options = optimoptions(options,'FunctionTolerance', 0.0);
+options = optimoptions(options,'MigrationFraction', 0.5);
 options = optimoptions(options,'Display', 'off');
 options = optimoptions(options,'MaxStallGenerations', inf);
-options = optimoptions(options,'PlotFcn', { @gaplotbestf });
+options = optimoptions(options,'PlotFcn', { @gaplotbestf, @(a,b,c)customPlotfun(a,b,c,s,index,dt) });
 [x,fval,exitflag,output,population,score] = ...
 ga(@(x)modelError(x,s,[index]),11,[],[],[],[],lb,ub,[],[],options);
 
 p1 = x.*[1 nan 1 nan nan nan 1 1 1 1 1];
 
 
-[S_, t_] = computeSerie(size(s,2)/dt, dt, p1(1), p1(2), p1(3), p1(4), p1(5), p1(6), p1(7), p1(8), p1(9), p1(10), p1(11));
-t_ = t_(1:round(1/dt):end);
+plotResult(s, index,dt,p1);
 
-sHat = S_(index,1:round(1/dt):end);
-
-
-figure();
-plot(t_,s);
-hold('on');
-plot(t_,sHat);
-line([p1(9)*max(t_) p1(9)*max(t_)],[0 max(s)])
-
+% [S_, t_] = computeSerie(size(s,2)/dt, dt, p1(1), p1(2), p1(3), p1(4), p1(5), p1(6), p1(7), p1(8), p1(9), p1(10), p1(11));
+% t_ = t_(1:round(1/dt):end);
+% 
+% sHat = S_(index,1:round(1/dt):end);
+% 
+% 
+% figure();
+% plot(t_,s);
+% hold('on');
+% plot(t_,sHat);
+% line([p1(9)*max(t_) p1(9)*max(t_)],[0 max(s)])
+% 
