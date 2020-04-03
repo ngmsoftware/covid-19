@@ -24,18 +24,20 @@ dt = 0.2;
 beta = 1.0;     % Infection rate (average time between contacts) : 1/day
 gamma = 1.0;      % average latent time (inverse of incubation time. infected but not infecting others) : 1/day
 N = population;        % population : individuals
-N0 = active(1);
+N0 = 100;
+%time1 = 0.3043;  % for china
 time1 = 1;
 beta2 = beta;
 gamma2 = gamma;
+zeroPad = 1;
 
 
-parameters = [beta, 0.0, gamma, 0.0, 0.0, 0.0, N, N0, time1, beta2 gamma2];
+parameters = [beta, 0.0, gamma, 0.0, 0.0, 0.0, N, N0, time1, beta2 gamma2 zeroPad];
 
 
 % fitting the second beta
-lb = parameters.*[0.1 0 0.1 0 0 0 1 0.1 0.0 0.0 0.0];
-ub = parameters.*[ 10 0  10 0 0 0 1  10 1.0  10, 10];
+lb = parameters.*[1.0   0   1.0    0 0 0   1      1    0.0    1.0   1.0    0];
+ub = parameters.*[ 2   0    2    0 0 0   1      1    1.0   2.0,   2.0   10];
 
 
 
@@ -44,17 +46,18 @@ options = optimoptions('ga');
 options = optimoptions(options,'MaxGenerations', 10000);
 options = optimoptions(options,'PopulationSize', 2000);
 options = optimoptions(options,'FunctionTolerance', 0.0);
-options = optimoptions(options,'MigrationFraction', 0.5);
+%options = optimoptions(options,'MigrationFraction', 0.05);
 options = optimoptions(options,'Display', 'off');
+%options = optimoptions(options,'MutationFcn',{@mutationgaussian,1,0.95});
 options = optimoptions(options,'MaxStallGenerations', inf);
 options = optimoptions(options,'PlotFcn', { @gaplotbestf, @(a,b,c)customPlotfun(a,b,c,s,index,dt) });
 [x,fval,exitflag,output,population,score] = ...
-ga(@(x)modelError(x,s,[index]),11,[],[],[],[],lb,ub,[],[],options);
+ga(@(x)modelError(x,s,[index]),12,[],[],[],[],lb,ub,[],[],options);
 
-p1 = x.*[1 nan 1 nan nan nan 1 1 1 1 1];
+p1 = x.*[1 nan 1 nan nan nan 1 1 1 1 1 1];
 
 
-plotResult(s, index,dt,p1);
+plotResult(s, index, dt, p1);
 
 % [S_, t_] = computeSerie(size(s,2)/dt, dt, p1(1), p1(2), p1(3), p1(4), p1(5), p1(6), p1(7), p1(8), p1(9), p1(10), p1(11));
 % t_ = t_(1:round(1/dt):end);
