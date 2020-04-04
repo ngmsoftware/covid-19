@@ -1,7 +1,7 @@
 clear();
 clc();
 
-country = 'Brazil';
+country = 'China';
 country2 = country;
 %country2 = 'United States of America';
 
@@ -12,22 +12,25 @@ population = populations(idx);
 
 
 [date, confirmed, deaths, recovered] = getData(country);
-active = confirmed - recovered + deaths;
-active(active==0) = [];
-s = active;
+infected = confirmed - recovered + deaths;
+infected(infected==0) = [];
 
+s = [population-confirmed; recovered];
+index = [1 3]; % S_(index) will be the variable to match
 
-MAX_ITER = 600;
+s = infected;
+index = 2; % S_(index) will be the variable to match
 
-index = 3; % S_(index) will be the variable to match
+MAX_ITER = 1000;
+
 
 dt = 0.2;
 
 N = population;
-N0 = active(1);
+N0 = infected(1);
 
-Nb = 200;
-Ng = 200;
+Nb = 400;
+Ng = 400;
 
 E = zeros(Nb,Ng);
 
@@ -35,33 +38,42 @@ idxBetaMin = 1;
 idxGammaMin = 1;
 errMin = Inf;
 
-% italy
-beta0 =  3.6734;
-gamma0 = 3.4623;
 
 
-% brasil
-beta0 =  3.0;
-gamma0 = 3.0;
+% Italy
+beta_1 =  0.1;
+gamma_1 = 0.02;
+beta_2 =  2.2;
+gamma_2 = 2.03;
 
 
-betaAmp = 3.0;
-gammaAmp = 3.0;
 
-BETAS = beta0 + linspace(-betaAmp, betaAmp, Nb);
-GAMMAS = gamma0 + linspace(-gammaAmp,gammaAmp, Ng);
+beta_1 =  18.0;
+gamma_1 = 18.0;
+beta_2 =  20.0;
+gamma_2 = 20.0;
+
+
+
+
+BETAS = linspace(beta_1, beta_2, Nb);
+GAMMAS = linspace(gamma_1, gamma_2, Ng);
 
 idxBeta = 1;
 for beta = BETAS
     idxGamma = 1;
     for gamma = GAMMAS
-        parameters = [beta, 0.0, gamma, 0.0, 0.0, 0.0, N, N0, 1, 0 0 0];
-        err = modelError(parameters, s, index);
+        
+        
+        parameters = [beta, gamma];
+        err = modelError(s, dt, index, beta, gamma, N, N0);
         if (errMin > err)
             idxBetaMin = idxBeta;
             idxGammaMin = idxGamma;
             errMin = err;
         end
+            
+            
         E(idxBeta, idxGamma) = err;
         idxGamma = idxGamma+1;
     end
@@ -79,4 +91,11 @@ mesh(B, G, log(1+E));
 plot3(beta1, gamma1, 0, 'ro');
 
 subplot(1,2,2);
-plotResult(s, index, dt, [beta1, 0.0, gamma1, 0.0, 0.0, 0.0, N, N0, 1, 0 0 0])
+plotResult(s, index, dt, beta1, gamma1, N, N0)
+
+[S_, t_] = computeSerie(MAX_ITER, dt, beta1, gamma1, N, N0);
+plot(t_, S_(index,:), 'k:');
+
+
+
+

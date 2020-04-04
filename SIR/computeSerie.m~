@@ -1,4 +1,4 @@
-function [S_, t_] = computeSerie(MAX_ITER, dt, beta, aplha, gamma, delta, kappa, lambda, N, N0, time1, beta2) 
+function [S_, t_] = computeSerie(MAX_ITER, dt, beta, gamma, N, N0) 
 
 % S = State(1) - Suceptible
 % E = State(2) - Exposed 
@@ -7,8 +7,6 @@ function [S_, t_] = computeSerie(MAX_ITER, dt, beta, aplha, gamma, delta, kappa,
 % R = State(5) - Recovered
 % D = State(6) - Death
 % P = State(7) - Insuceptible
-
-parameters = [beta, aplha, gamma, delta, lambda, kappa, N];
 
 S = zeros(7,1);
 S(1) = N;
@@ -24,7 +22,10 @@ for i=1:MAX_ITER
     S = stepModel(S, parameters, dt);
     t = t+dt;
 
-plot((0.5+atan(x-600*0.8)/pi)*(beta2-beta1)+beta1 )
+    if ~isnan(time1)
+        parameters(1) = (0.5+atan((i-MAX_ITER*time1)*5)/pi)*(beta2-beta)+beta;
+        parameters(3) = (0.5+atan((i-MAX_ITER*time1)*5)/pi)*(gamma2-gamma)+gamma;
+    end
     
     S_(:,i) = S;
     t_(i) = t;
