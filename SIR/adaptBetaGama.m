@@ -1,105 +1,39 @@
-function [beta, gamma] = adaptBetaGama(beta0, gamma0, alpha, s, dt, N, N0)
+function [beta, gamma] = adaptBetaGama(s, dt, N)
 
-    beta = beta0;
-    gamma = gamma0;
+NSamples = size(s,2);
 
-    dEdBeta  = 0;
-    dEdGamma  = 0;
-    SIHat_n_1 = N0;
-    SSHat_n_1 = N;
-    dSIdBeta_n_1 = randn(1)/1000;
-    dSSdBeta_n_1 = randn(1)/1000;
-    dSIdGamma_n_1 = randn(1)/1000;
-    dSSdGamma_n_1 = randn(1)/1000;
-    n = 1;
-    SIHat_n = zeros(1,round(size(s,2)/dt));
-    SSHat_n = zeros(1,round(size(s,2)/dt));
-    dSIdBeta_n = zeros(1,round(size(s,2)/dt));
-    dSSdBeta_n = zeros(1,round(size(s,2)/dt));
-    dSIdGamma_n = zeros(1,round(size(s,2)/dt));
-    dSSdGamma_n = zeros(1,round(size(s,2)/dt));
-    for i=1:length(SIHat_n)
+S = s(1,:);
+I = s(2,:);
 
+beta = 0;
+gamma = 0;
 
-        SIHat_n(n) = SIHat_n_1 + fI(SIHat_n_1, SSHat_n_1, beta, gamma, N)*dt;
-        SSHat_n(n) = SSHat_n_1 + fS(SIHat_n_1, SSHat_n_1, beta, gamma, N)*dt;
+for n=2:NSamples
+    beta = beta + (N*(S(n-1) - S(n))/dt)/(S(n-1)*I(n-1));
+end
+beta = beta/(NSamples-1);
 
+for n=2:NSamples
+    gamma = gamma + (beta*S(n-1)*I(n-1)/N -(I(n) - I(n-1))/dt)/I(n-1);
+end
+gamma = gamma/(NSamples-1);
 
-        % beta computation
-        
-        dSIdBeta_n(n) = dSIdBeta_n_1 + dfIdSI(SIHat_n_1, SSHat_n_1, beta, gamma, N)*dSIdBeta_n_1*dt + dfIdSS(SIHat_n_1, SSHat_n_1, beta, gamma, N)*dSSdBeta_n_1*dt;
-        dSSdBeta_n(n) = dSSdBeta_n_1 + dfSdSI(SIHat_n_1, SSHat_n_1, beta, gamma, N)*dSIdBeta_n_1*dt + dfSdSS(SIHat_n_1, SSHat_n_1, beta, gamma, N)*dSSdBeta_n_1*dt;
+ 
 
-       
-        
-        % gamma computation
-        
-        dSIdGamma_n(n) = dSIdGamma_n_1 + dfIdSI(SIHat_n_1, SSHat_n_1, beta, gamma, N)*dSIdGamma_n_1 + dfIdSS(SIHat_n_1, SSHat_n_1, beta, gamma, N)*dSSdGamma_n_1;
-        dSSdGamma_n(n) = dSSdGamma_n_1 + dfSdSI(SIHat_n_1, SSHat_n_1, beta, gamma, N)*dSIdGamma_n_1 + dfSdSS(SIHat_n_1, SSHat_n_1, beta, gamma, N)*dSSdGamma_n_1;
-
-        
-        
-        
-        
-        
-        SIHat_n_1 = SIHat_n(n);
-        SSHat_n_1 = SSHat_n(n);
-        dSIdBeta_n_1 = dSIdBeta_n(n);
-        dSSdBeta_n_1 = dSSdBeta_n(n);
-        dSIdGamma_n_1 = dSIdGamma_n(n);
-        dSSdGamma_n_1 = dSSdGamma_n(n);
-        
-        n = n+1;
-    end
-
-    
-    dEdBeta  = 2*sum( (SIHat_n(1:round(1/dt):end) - s).*dSIdBeta_n(1:round(1/dt):end) );
-    dEdGamma  = 2*sum( (SIHat_n(1:round(1/dt):end) - s).*dSIdGamma_n(1:round(1/dt):end) );
-
-
-
-    beta  = beta0 - alpha*dEdBeta/N;
-    gamma = gamma0 - alpha*dEdGamma/N;
-
-
-    
-    cla();
-    hold('on');
-    plot(dSIdBeta_n);
-    plot(dSSdBeta_n);
-    plot(dSIdGamma_n);
-    plot(dSSdGamma_n);
-    
+M = zeros(2*(NSamples-1),2);
+D = zeros(2*(NSamples-1),1);
+for n=1:size(S,2)-1
+    M(2*n-1,:) = [-S(n)*I(n)/N 0];
+    M(2*n,:) = [S(n)*I(n)/N -I(n)];
+    D(2*n-1,:) = S(n+1)-S(n)/dt;
+    D(2*n,:) = I(n+1)-I(n)/dt;
 end
 
+betaGamma = pinv(M)*D;
 
-
-function y = fI(SI, SS, beta, gamma, N)
-    y = beta*SI*SS/N - gamma*SI;
-end
-
-
-function y = fS(SI, SS, beta, gamma, N)
-    y = -beta*SI*SS/N;
-end
+beta = betaGamma(1);
+gamma = betaGamma(2);
 
 
 
-function y = dfIdSI(SI, SS, beta, gamma, N)
-    y = beta*SS/N - gamma;
-end
-
-function y = dfIdSS(SI, SS, beta, gamma, N)
-    y = beta*SI/N;
-end
-
-
-
-function y = dfSdSI(SI, SS, beta, gamma, N)
-    y = -beta*SS/N;
-end
-
-function y = dfSdSS(SI, SS, beta, gamma, N)
-    y = -beta*SI/N;
-end
 

@@ -13,7 +13,6 @@ population = populations(idx);
 
 [date, confirmed, deaths, recovered] = getData(country);
 active = confirmed - recovered + deaths;
-active(active==0) = [];
 s = active;
 
 
@@ -55,8 +54,7 @@ idxBeta = 1;
 for beta = BETAS
     idxGamma = 1;
     for gamma = GAMMAS
-        parameters = [beta, 0.0, gamma, 0.0, 0.0, 0.0, N, N0, 1, 0 0 0];
-        err = modelError(parameters, s, index);
+        err = modelError(beta, gamma, s, index);
         if (errMin > err)
             idxBetaMin = idxBeta;
             idxGammaMin = idxGamma;
@@ -79,4 +77,4 @@ mesh(B, G, log(1+E));
 plot3(beta1, gamma1, 0, 'ro');
 
 subplot(1,2,2);
-plotResult(s, index, dt, [beta1, 0.0, gamma1, 0.0, 0.0, 0.0, N, N0, 1, 0 0 0])
+plotResult(s, index, dt, beta1, gamma1, N, N0, 1)

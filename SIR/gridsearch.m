@@ -1,7 +1,7 @@
 clear();
 clc();
 
-country = 'China';
+country = 'Canada';
 country2 = country;
 %country2 = 'United States of America';
 

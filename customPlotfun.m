@@ -1,8 +1,8 @@
 function state = customPlotfun(options,state,flag, s, index, dt)
 
-    [~, bestIndividualIdx] = min(state.Score);
-    p1 = state.Population(bestIndividualIdx,:);
+    %[~, bestIndividualIdx] = min(state.Score);
+    %p1 = state.Population(bestIndividualIdx,:);
     
-    plotResult(s,index,dt,p1);
+    %plotResult(s,index,dt,p1, 100);
 end
 

@@ -11,4 +11,6 @@ function [date, confirmed, deaths, recovered] = getData(country)
     
     date = cell2mat(cellfun(@(x) datenum(x),{a.Brazil.date},'UniformOutput',false));
     date = date-date(1);
+    
+    disp(a.Brazil(end).date)
 end
